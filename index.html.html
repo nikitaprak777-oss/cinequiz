@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineQuiz — Угадай всё о кино</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#10101a;--bg3:#16162a;
+  --accent:#e8c84a;--accent2:#ff6b35;
+  --text:#f0ede6;--muted:#6b6880;--card:#13131f;
+  --border:rgba(255,255,255,0.08);
+  --green:#34d399;--red:#f87171;
+  --nav:62px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:var(--nav);display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(10,10,15,.97);border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.08em;color:var(--accent);text-decoration:none;flex-shrink:0}
+.logo span{color:var(--text)}
+.nav-links{display:flex;gap:4px;list-style:none;align-items:center}
+.nav-links li button{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:8px 12px;transition:color .2s;white-space:nowrap}
+.nav-links li button:hover{color:var(--text)}
+.nav-cta{background:var(--accent)!important;color:var(--bg)!important;font-weight:700!important;border-radius:3px;margin-left:6px;padding:9px 18px!important}
+.nav-cta:hover{background:#f5d96a!important}
+.burger{display:none;background:none;border:none;color:var(--text);font-size:1.6rem;cursor:pointer;padding:8px;line-height:1;-webkit-tap-highlight-color:transparent}
+
+/* MOBILE MENU */
+.mmenu{display:none;position:fixed;top:var(--nav);left:0;right:0;background:rgba(10,10,15,.99);border-bottom:1px solid var(--border);z-index:299;flex-direction:column}
+.mmenu.open{display:flex}
+.mmenu button{background:none;border:none;border-bottom:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;padding:17px 24px;text-align:left;cursor:pointer;transition:color .2s;-webkit-tap-highlight-color:transparent}
+.mmenu button:last-child{border-bottom:none;color:var(--accent);font-weight:700}
+.mmenu button:hover{color:var(--text)}
+
+/* HERO */
+.hero{min-height:100svh;display:flex;align-items:center;position:relative;padding:calc(var(--nav) + 52px) 32px 64px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(124,92,252,.12),transparent 60%),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(232,200,74,.08),transparent 50%),radial-gradient(ellipse 40% 30% at 80% 20%,rgba(255,107,53,.08),transparent 50%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent 80%)}
+.hero-content{position:relative;z-index:2;max-width:640px;width:100%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.25);border-radius:100px;padding:6px 16px 6px 8px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;animation:fadeUp .6s ease both}
+.bdot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,10vw,8.5rem);line-height:.92;letter-spacing:.02em;margin-bottom:20px;animation:fadeUp .6s .1s ease both}
+h1 .ghost{color:transparent;-webkit-text-stroke:1.5px rgba(240,237,230,.2)}
+h1 .gold{color:var(--accent)}
+.hero-desc{font-size:clamp(.9rem,2.5vw,1.05rem);line-height:1.7;color:var(--muted);max-width:440px;margin-bottom:36px;animation:fadeUp .6s .2s ease both}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.07em;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:all .25s;-webkit-tap-highlight-color:transparent;white-space:nowrap;text-decoration:none}
+.btn-y{background:var(--accent);color:var(--bg);padding:14px 28px}
+.btn-y::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:translateX(-100%);transition:transform .4s}
+.btn-y:hover::after{transform:translateX(100%)}
+.btn-y:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(232,200,74,.3)}
+.btn-y:active{transform:translateY(0)}
+.btn-o{background:none;color:var(--text);padding:14px 22px;border:1px solid var(--border)}
+.btn-o:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.04)}
+.btn-sm{padding:10px 18px;font-size:.8rem}
+.btn-full{width:100%}
+
+/* TICKER */
+.ticker{background:var(--accent);color:var(--bg);padding:10px 0;overflow:hidden}
+.ticker-track{display:flex;animation:tick 28s linear infinite;white-space:nowrap}
+.ti{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:.14em;padding:0 28px}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+section{padding:80px 32px;position:relative}
+.stag{font-size:.68rem;text-transform:uppercase;letter-spacing:.2em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.stag::before{content:'';width:24px;height:1px;background:var(--accent)}
+h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,6vw,4.4rem);line-height:.95;margin-bottom:14px}
+.sdesc{color:var(--muted);font-size:.92rem;max-width:420px;line-height:1.7}
+
+/* GAMES */
+.games-hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;flex-wrap:wrap;gap:16px}
+.games-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.gc{background:var(--card);border:1px solid var(--border);padding:28px 24px;position:relative;overflow:hidden;transition:transform .3s,border-color .3s;cursor:pointer;display:flex;flex-direction:column;min-height:190px;-webkit-tap-highlight-color:transparent}
+.gc::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none}
+.gc:nth-child(1)::before{background:radial-gradient(ellipse at 0% 0%,rgba(232,200,74,.1),transparent 70%)}
+.gc:nth-child(2)::before{background:radial-gradient(ellipse at 100% 0%,rgba(255,107,53,.1),transparent 70%)}
+.gc:nth-child(3)::before{background:radial-gradient(ellipse at 100% 100%,rgba(124,92,252,.1),transparent 70%)}
+.gc:nth-child(4)::before{background:radial-gradient(ellipse at 0% 100%,rgba(52,211,153,.1),transparent 70%)}
+.gc:nth-child(5)::before{background:radial-gradient(ellipse at 50% 50%,rgba(232,200,74,.08),transparent 70%)}
+.gc:nth-child(6)::before{background:radial-gradient(ellipse at 0% 50%,rgba(255,107,53,.1),transparent 70%)}
+.gc:nth-child(7)::before{background:radial-gradient(ellipse at 100% 50%,rgba(124,92,252,.1),transparent 70%)}
+.gc:hover,.gc:active{transform:translateY(-3px);border-color:rgba(255,255,255,.18);z-index:2}
+.gc:hover::before,.gc:active::before{opacity:1}
+.gc.wide{grid-column:span 2}
+.gico{font-size:2.1rem;margin-bottom:13px;display:block;transition:transform .3s}
+.gc:hover .gico{transform:scale(1.1) rotate(-5deg)}
+.gcat{font-size:.63rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:7px}
+.gtitle{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.03em;margin-bottom:8px;line-height:1}
+.gdesc{font-size:.81rem;color:var(--muted);line-height:1.6;margin-bottom:18px;flex:1}
+.gmeta{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.diff{display:flex;gap:4px}
+.d{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.d.on{background:var(--accent)}.d.on.h{background:var(--accent2)}
+.gplay{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:none;background:none;cursor:pointer;font-family:inherit;padding:0;-webkit-tap-highlight-color:transparent}
+.gc:hover .gplay{letter-spacing:.16em}
+.gbadge{position:absolute;top:14px;right:14px;font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.gbadge.hot{background:rgba(255,107,53,.15);color:var(--accent2)}
+.gbadge.new{background:rgba(52,211,153,.15);color:var(--green)}
+.gbadge.pro{background:rgba(232,200,74,.15);color:var(--accent)}
+
+/* HOW */
+.how-sec{background:var(--bg2)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:44px;background:var(--border)}
+.step{background:var(--bg2);padding:36px 28px;position:relative}
+.step-n{font-family:'Bebas Neue',sans-serif;font-size:4rem;color:rgba(255,255,255,.04);position:absolute;top:12px;right:14px;line-height:1}
+.step-ico{font-size:1.7rem;margin-bottom:18px;background:var(--card);width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:4px}
+.step h3{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.03em;margin-bottom:8px}
+.step p{font-size:.81rem;color:var(--muted);line-height:1.65}
+
+/* LEADERBOARD */
+.lb-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;margin-top:44px}
+.lb-box{background:var(--card);border:1px solid var(--border);overflow:hidden}
+.lb-head{background:var(--bg3);padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.lb-head-t{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em}
+.lb-live{display:flex;align-items:center;gap:6px;font-size:.68rem;color:var(--green);text-transform:uppercase;letter-spacing:.1em}
+.lb-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 2s infinite}
+.lb-list{min-height:180px}
+.lb-row{display:flex;align-items:center;padding:13px 22px;border-bottom:1px solid var(--border);gap:12px;transition:background .2s}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:rgba(255,255,255,.02)}
+.lbrank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;width:26px;text-align:center;color:var(--muted);flex-shrink:0}
+.lb-row.r1 .lbrank{color:var(--accent)}.lb-row.r2 .lbrank{color:#c0c0c0}.lb-row.r3 .lbrank{color:#cd7f32}
+.lb-row.me{background:rgba(232,200,74,.06);border-left:2px solid var(--accent)}
+.lb-av{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.85rem;border:2px solid var(--border);flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-game{font-size:.67rem;color:var(--muted);margin-top:2px}
+.lb-score{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--accent);flex-shrink:0}
+.lb-empty,.lb-loading{padding:32px 22px;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.6}
+
+/* NICK PANEL */
+.nick-panel{background:var(--card);border:1px solid var(--border);padding:24px}
+.nick-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.05em;margin-bottom:5px}
+.nick-sub{font-size:.79rem;color:var(--muted);margin-bottom:16px;line-height:1.55}
+.nick-cur{display:flex;align-items:center;gap:11px;padding:12px 14px;background:var(--bg2);border:1px solid rgba(232,200,74,.22);margin-bottom:16px}
+.nick-cur .av{font-size:1.3rem;flex-shrink:0}
+.nick-cur .nm{font-weight:600;font-size:.9rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.change-btn{font-size:.7rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;text-transform:uppercase;letter-spacing:.07em;-webkit-tap-highlight-color:transparent;padding:4px;flex-shrink:0}
+.nick-row{display:flex;gap:8px}
+.nick-inp{flex:1;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;min-width:0;-webkit-appearance:none;border-radius:0}
+.nick-inp:focus{border-color:var(--accent)}
+.nick-inp::placeholder{color:var(--muted)}
+.my-stats{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.my-stats-lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:11px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sb{background:var(--bg2);padding:12px 8px;text-align:center;border:1px solid var(--border)}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--accent)}
+.sl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:2px}
+
+/* CTA */
+.cta-sec{background:var(--bg);text-align:center;padding:100px 32px;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(124,92,252,.1),transparent 60%)}
+.cta-sec h2{position:relative;z-index:1;font-size:clamp(2.5rem,7vw,6rem);margin-bottom:16px}
+.cta-sec p{position:relative;z-index:1;color:var(--muted);font-size:.95rem;max-width:400px;margin:0 auto 32px;line-height:1.7}
+.cta-btns{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;position:relative;z-index:1}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.fc{font-size:.75rem;color:var(--muted);margin-top:4px}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.rv.vis{opacity:1;transform:translateY(0)}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;padding:16px;overflow-y:auto}
+.overlay.on{opacity:1;pointer-events:all}
+.modal{background:var(--card);border:1px solid rgba(255,255,255,.1);width:100%;max-width:560px;transform:translateY(14px);transition:transform .25s;max-height:calc(100svh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch;margin:auto}
+.overlay.on .modal{transform:translateY(0)}
+.mhdr{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);z-index:10}
+.mhdr h3{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.05em}
+.mx{background:none;border:none;color:var(--muted);font-size:1.35rem;cursor:pointer;padding:6px 10px;transition:color .2s;line-height:1;-webkit-tap-highlight-color:transparent}
+.mx:hover{color:var(--text)}
+.mbody{padding:24px}
+
+/* GAME UI */
+.gprog{display:flex;gap:5px;margin-bottom:22px}
+.gp{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .3s}
+.gp.done{background:var(--accent)}.gp.cur{background:rgba(232,200,74,.45)}
+.qlbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:7px}
+.qtext{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1rem,3vw,1.2rem);line-height:1.5;margin-bottom:22px;border-left:3px solid var(--accent);padding-left:15px}
+.qtext.plain{font-family:'DM Sans',sans-serif;font-style:normal;font-size:clamp(.9rem,2.5vw,1rem)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.opt{background:var(--bg2);border:1px solid var(--border);padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--text);cursor:pointer;text-align:left;transition:all .18s;line-height:1.4;-webkit-tap-highlight-color:transparent;border-radius:0;-webkit-appearance:none;min-height:50px}
+.opt:hover:not(:disabled),.opt:active:not(:disabled){border-color:rgba(232,200,74,.4);background:rgba(232,200,74,.06)}
+.opt.correct{border-color:var(--green)!important;background:rgba(52,211,153,.12)!important;color:var(--green)!important}
+.opt.wrong{border-color:var(--red)!important;background:rgba(248,113,113,.12)!important;color:var(--red)!important}
+.opt:disabled{cursor:not-allowed}
+.gfoot{display:flex;justify-content:space-between;align-items:center;padding-top:13px;border-top:1px solid var(--border)}
+.gscore{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent)}
+.gtimer{display:flex;align-items:center;gap:8px}
+.tbar-out{width:68px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.tbar{height:100%;background:var(--accent);width:100%;border-radius:3px}
+.tbar.low{background:var(--red)}
+.tnum{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--muted);min-width:26px;text-align:right}
+.tnum.low{color:var(--red)}
+.fb{text-align:center;padding:9px 0;font-weight:600;font-size:.87rem;min-height:34px}
+.fb.ok{color:var(--green)}.fb.bad{color:var(--red)}
+
+.sval{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:2.6rem;color:var(--accent);margin-bottom:7px}
+.sval small{font-size:1.3rem;color:var(--muted)}
+.slabels{display:flex;justify-content:space-between;font-size:.71rem;color:var(--muted);margin-bottom:4px}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;margin-bottom:14px;height:28px}
+
+.ana-disp{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);letter-spacing:.14em;text-align:center;padding:16px;background:var(--bg2);border:1px solid var(--border);margin-bottom:6px;color:var(--accent);word-break:break-all;line-height:1.3}
+.ana-hint{font-size:.74rem;color:var(--muted);text-align:center;margin-bottom:14px}
+.ainput{width:100%;padding:13px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.1em;outline:none;transition:border-color .2s;margin-bottom:10px;-webkit-appearance:none;border-radius:0}
+.ainput:focus{border-color:var(--accent)}
+
+.emoji-disp{font-size:clamp(2rem,8vw,2.8rem);text-align:center;padding:18px;background:var(--bg2);border:1px solid var(--border);margin-bottom:18px}
+
+.res{text-align:center;padding:10px 0}
+.res-ico{font-size:3rem;margin-bottom:12px}
+.res-title{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;letter-spacing:.04em;margin-bottom:5px}
+.res-sub{font-size:.86rem;color:var(--muted);margin-bottom:3px}
+.res-pts{font-family:'Bebas Neue',sans-serif;font-size:2.7rem;color:var(--accent);margin-bottom:5px}
+.res-rank{font-size:.8rem;color:var(--muted);margin-bottom:20px}
+.res-rank b{color:var(--accent)}
+.res-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* NICK MODAL */
+.nm-body{padding:24px}
+.nm-body p{font-size:.87rem;color:var(--muted);margin-bottom:16px;line-height:1.55}
+.nm-inp{width:100%;padding:13px 15px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;margin-bottom:14px;-webkit-appearance:none;border-radius:0}
+.nm-inp:focus{border-color:var(--accent)}
+.nm-inp.err{border-color:var(--red)}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .games-grid{grid-template-columns:repeat(2,1fr)}
+  .gc.wide{grid-column:span 1}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .lb-layout{grid-template-columns:1fr;gap:24px}
+}
+@media(max-width:600px){
+  nav{padding:0 16px}
+  .nav-links{display:none}
+  .burger{display:block}
+  section{padding:56px 16px}
+  .hero{padding:calc(var(--nav) + 36px) 16px 48px}
+  .games-grid{grid-template-columns:1fr;gap:2px}
+  .games-hdr{flex-direction:column;align-items:flex-start}
+  .opts{grid-template-columns:1fr}
+  .mbody{padding:16px}
+  .mhdr{padding:15px 16px}
+  .nm-body{padding:16px}
+  .hero-btns{flex-direction:column}
+  .btn-y,.btn-o{width:100%}
+  .steps{grid-template-columns:1fr}
+  footer{padding:24px 16px;flex-direction:column;align-items:flex-start}
+  .cta-sec{padding:72px 16px}
+  .cta-btns{flex-direction:column;align-items:center}
+  .cta-btns .btn-y,.cta-btns .btn-o{width:100%;max-width:320px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Cine<span>Quiz</span></a>
+  <ul class="nav-links">
+    <li><button onclick="goTo('games')">Игры</button></li>
+    <li><button onclick="goTo('how')">Как играть</button></li>
+    <li><button onclick="goTo('leaders')">Рейтинг</button></li>
+    <li><button class="nav-cta btn" onclick="goTo('games')">Играть</button></li>
+  </ul>
+  <button class="burger" id="burgerBtn" onclick="toggleMM()">☰</button>
+</nav>
+
+<div class="mmenu" id="mmenu">
+  <button onclick="goTo('games');closeMM()">🎮 Игры</button>
+  <button onclick="goTo('how');closeMM()">📖 Как играть</button>
+  <button onclick="goTo('leaders');closeMM()">🏆 Рейтинг</button>
+  <button onclick="goTo('games');closeMM()">▶ Начать играть</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="bdot"></span>Без регистрации — просто введи ник</div>
+    <h1>УГАДАЙ<br><span class="ghost">ВСЁ О</span><br><span class="gold">КИНО</span></h1>
+    <p class="hero-desc">Проверь себя в 7 мини-играх о фильмах, актёрах и культовых цитатах. Попади в топ рейтинга.</p>
+    <div class="hero-btns">
+      <button class="btn btn-y" onclick="goTo('games')">🎮 Перейти к играм</button>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ti">🎭 УГАДАЙ АКТЁРА</span><span class="ti">✦</span>
+    <span class="ti">🎞 УГАДАЙ ФИЛЬМ</span><span class="ti">✦</span>
+    <span class="ti">💬 ПРОДОЛЖИ ФРАЗУ</span><span class="ti">✦</span>
+    <span class="ti">😀 ЭМОДЗИ-ФИЛЬМ</span><span class="ti">✦</span>
+    <span class="ti">🔤 АНАГРАММА</span><span class="ti">✦</span>
+    <span class="ti">📅 ГОД ВЫХОДА</span><span class="ti">✦</span>
+    <span class="ti">⭐ РЕЙТИНГ IMDB</span><span class="ti">✦</span>
+    <span class="ti">🎭 УГАДАЙ АКТЁРА</span><span class="ti">✦</span>
+    <span class="ti">🎞 УГАДАЙ ФИЛЬМ</span><span class="ti">✦</span>
+    <span class="ti">💬 ПРОДОЛЖИ ФРАЗУ</span><span class="ti">✦</span>
+    <span class="ti">😀 ЭМОДЗИ-ФИЛЬМ</span><span class="ti">✦</span>
+    <span class="ti">🔤 АНАГРАММА</span><span class="ti">✦</span>
+    <span class="ti">📅 ГОД ВЫХОДА</span><span class="ti">✦</span>
+    <span class="ti">⭐ РЕЙТИНГ IMDB</span><span class="ti">✦</span>
+  </div>
+</div>
+
+<!-- GAMES -->
+<section id="games">
+  <div class="games-hdr rv">
+    <div>
+      <div class="stag">Коллекция игр</div>
+      <h2>ВСЕ<br>МИНИ-ИГРЫ</h2>
+    </div>
+    <p class="sdesc">7 режимов — очки идут в общий рейтинг!</p>
+  </div>
+  <div class="games-grid">
+
+    <div class="gc wide rv" onclick="startGame('actor')">
+      <span class="gbadge hot">🔥 Хит</span>
+      <span class="gico">🎭</span>
+      <div class="gcat">Актёры</div>
+      <div class="gtitle">Угадай Актёра</div>
+      <p class="gdesc">По описанию фильмографии определи, кто этот актёр.</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d on"></div><div class="d on h"></div><div class="d"></div><div class="d"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+    <div class="gc rv" onclick="startGame('frame')">
+      <span class="gico">🎞️</span>
+      <div class="gcat">Фильмы</div>
+      <div class="gtitle">Угадай Фильм</div>
+      <p class="gdesc">Краткий синопсис — угадай название.</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d on"></div><div class="d"></div><div class="d"></div><div class="d"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+    <div class="gc rv" onclick="startGame('quote')">
+      <span class="gbadge new">✨ Топ</span>
+      <span class="gico">💬</span>
+      <div class="gcat">Цитаты</div>
+      <div class="gtitle">Продолжи Фразу</div>
+      <p class="gdesc">Культовая реплика — из какого фильма?</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d on"></div><div class="d on h"></div><div class="d on h"></div><div class="d"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+    <div class="gc rv" onclick="startGame('emoji')">
+      <span class="gico">😀</span>
+      <div class="gcat">Эмодзи</div>
+      <div class="gtitle">Фильм в Эмодзи</div>
+      <p class="gdesc">Название зашифровано в эмодзи — расшифруй!</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d on"></div><div class="d"></div><div class="d"></div><div class="d"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+    <div class="gc rv" onclick="startGame('anagram')">
+      <span class="gico">🔤</span>
+      <div class="gcat">Слова</div>
+      <div class="gtitle">Анаграмма</div>
+      <p class="gdesc">Буквы перемешаны — восстанови название фильма.</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+    <div class="gc rv" onclick="startGame('year')">
+      <span class="gico">📅</span>
+      <div class="gcat">История</div>
+      <div class="gtitle">Год Выхода</div>
+      <p class="gdesc">Передвинь ползунок — угадай год фильма.</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d on"></div><div class="d on h"></div><div class="d on h"></div><div class="d on h"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+    <div class="gc rv" onclick="startGame('imdb')">
+      <span class="gbadge pro">🏆 Эксперт</span>
+      <span class="gico">⭐</span>
+      <div class="gcat">Рейтинги</div>
+      <div class="gtitle">Рейтинг IMDb</div>
+      <p class="gdesc">Угадай оценку фильма на IMDb с точностью до 0.1.</p>
+      <div class="gmeta">
+        <div class="diff"><div class="d on"></div><div class="d on"></div><div class="d on h"></div><div class="d"></div><div class="d"></div></div>
+        <span class="gplay">Играть →</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="how-sec" id="how">
+  <div class="stag rv">Как это работает</div>
+  <h2 class="rv">ЧЕТЫРЕ ШАГА<br>ДО ПОБЕДЫ</h2>
+  <div class="steps">
+    <div class="step rv"><div class="step-n">01</div><div class="step-ico">✏️</div><h3>Введи ник</h3><p>Придумай никнейм — он сохранится и появится в рейтинге после каждой игры.</p></div>
+    <div class="step rv"><div class="step-n">02</div><div class="step-ico">🎮</div><h3>Выбери игру</h3><p>7 режимов — цитаты, анаграммы, эмодзи, годы, IMDb и другие.</p></div>
+    <div class="step rv"><div class="step-n">03</div><div class="step-ico">⚡</div><h3>Отвечай быстро</h3><p>15 секунд на вопрос. Чем быстрее — тем больше очков за каждый ответ.</p></div>
+    <div class="step rv"><div class="step-n">04</div><div class="step-ico">🏆</div><h3>Попади в топ</h3><p>Лучший результат идёт в общий рейтинг всех игроков.</p></div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaders">
+  <div class="stag rv">Общий рейтинг</div>
+  <h2 class="rv">ТАБЛИЦА<br>ЛИДЕРОВ</h2>
+  <div class="lb-layout">
+
+    <div class="rv">
+      <div class="lb-box">
+        <div class="lb-head">
+          <div class="lb-head-t">🏆 Топ игроков</div>
+          <div class="lb-live"><span class="lb-dot"></span>Live</div>
+        </div>
+        <div class="lb-list" id="lbList"><div class="lb-loading">Загрузка…</div></div>
+      </div>
+    </div>
+
+    <div class="rv">
+      <div class="nick-panel">
+        <div class="nick-title">Твой профиль</div>
+        <div class="nick-sub">Введи никнейм чтобы участвовать в рейтинге. Сохранится автоматически.</div>
+        <div id="nickCur" style="display:none">
+          <div class="nick-cur">
+            <span class="av" id="nkAv">🎬</span>
+            <span class="nm" id="nkNm">—</span>
+            <button class="change-btn" onclick="showNickForm()">Изменить</button>
+          </div>
+        </div>
+        <div id="nickForm">
+          <div class="nick-row">
+            <input class="nick-inp" id="nickInp" placeholder="Твой никнейм…" maxlength="20" onkeydown="if(event.key==='Enter')saveNick()">
+            <button class="btn btn-y btn-sm" onclick="saveNick()">Сохранить</button>
+          </div>
+        </div>
+        <div class="my-stats" id="myStats" style="display:none">
+          <div class="my-stats-lbl">Моя статистика</div>
+          <div class="sg">
+            <div class="sb"><div class="sv" id="stGames">0</div><div class="sl">Игр</div></div>
+            <div class="sb"><div class="sv" id="stBest">0</div><div class="sl">Лучший</div></div>
+            <div class="sb"><div class="sv" id="stRank">—</div><div class="sl">Место</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="cta-bg"></div>
+  <h2 class="rv">ГОТОВ К<br><span style="color:var(--accent)">ИГРЕ?</span></h2>
+  <p class="rv">Бесплатно, без регистрации. Введи ник — и в топ.</p>
+  <div class="cta-btns rv">
+    <button class="btn btn-y" onclick="goTo('games')">🎮 Перейти к играм</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <a href="#" class="logo">Cine<span>Quiz</span></a>
+    <p class="fc">© 2025 CineQuiz. Все права защищены.</p>
+  </div>
+</footer>
+
+<!-- GAME MODAL -->
+<div class="overlay" id="gameOverlay">
+  <div class="modal">
+    <div class="mhdr">
+      <h3 id="gTitle">🎮 Игра</h3>
+      <button class="mx" onclick="closeGame()">✕</button>
+    </div>
+    <div class="mbody" id="gBody"></div>
+  </div>
+</div>
+
+<!-- NICK MODAL -->
+<div class="overlay" id="nickOverlay">
+  <div class="modal" style="max-width:400px">
+    <div class="mhdr">
+      <h3>👤 Введи никнейм</h3>
+      <button class="mx" onclick="closeNickModal()">✕</button>
+    </div>
+    <div class="nm-body">
+      <p>Чтобы попасть в рейтинг, придумай никнейм. Он сохранится в браузере и больше не нужно вводить.</p>
+      <input class="nm-inp" id="nmInp" placeholder="Твой никнейм…" maxlength="20" onkeydown="if(event.key==='Enter')saveNickModal()">
+      <button class="btn btn-y btn-full" onclick="saveNickModal()">Продолжить →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── NAVIGATION ───────────────────────────────────────────────
+function goTo(id) {
+  var el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+function toggleMM() { document.getElementById('mmenu').classList.toggle('open'); }
+function closeMM()  { document.getElementById('mmenu').classList.remove('open'); }
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#mmenu') && !e.target.closest('#burgerBtn')) closeMM();
+});
+
+// ─── SCROLL REVEAL ────────────────────────────────────────────
+document.querySelectorAll('.rv').forEach(function(el) {
+  new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.07 }).observe(el);
+});
+
+// ─── PARALLAX ─────────────────────────────────────────────────
+window.addEventListener('scroll', function() {
+  var b = document.querySelector('.hero-bg');
+  if (b) b.style.transform = 'translateY(' + (window.scrollY * 0.22) + 'px)';
+});
+
+// ─── AVATAR POOL ──────────────────────────────────────────────
+var AVS = ['🎬','🎭','🌟','🎞️','🍿','🎥','🏆','🎪','🦁','🐺','🦊','🎯','👑','🔥','⚡'];
+function getAv(nick) {
+  if (!nick) return '🎬';
+  var s = 0;
+  for (var i = 0; i < nick.length; i++) s += nick.charCodeAt(i);
+  return AVS[s % AVS.length];
+}
+
+// ─── NICKNAME ─────────────────────────────────────────────────
+var nickname = localStorage.getItem('cq_nick') || '';
+var pendingType = null;
+
+function updateNickUI() {
+  var has = !!nickname;
+  document.getElementById('nickCur').style.display  = has ? 'block' : 'none';
+  document.getElementById('nickForm').style.display  = has ? 'none'  : 'block';
+  document.getElementById('myStats').style.display   = has ? 'block' : 'none';
+  if (has) {
+    document.getElementById('nkAv').textContent = getAv(nickname);
+    document.getElementById('nkNm').textContent = nickname;
+    refreshMyStats();
+  }
+}
+function showNickForm() {
+  document.getElementById('nickCur').style.display = 'none';
+  document.getElementById('nickForm').style.display = 'block';
+  document.getElementById('nickInp').value = nickname;
+  document.getElementById('nickInp').focus();
+}
+function saveNick() {
+  var v = document.getElementById('nickInp').value.trim();
+  if (!v) return;
+  nickname = v;
+  localStorage.setItem('cq_nick', nickname);
+  document.getElementById('nickInp').value = '';
+  updateNickUI();
+  loadLB();
+}
+function saveNickModal() {
+  var inp = document.getElementById('nmInp');
+  var v = inp.value.trim();
+  if (!v) { inp.classList.add('err'); inp.focus(); return; }
+  inp.classList.remove('err');
+  nickname = v;
+  localStorage.setItem('cq_nick', nickname);
+  inp.value = '';
+  document.getElementById('nickOverlay').classList.remove('on');
+  updateNickUI();
+  if (pendingType) { openGame(pendingType); pendingType = null; }
+}
+function closeNickModal() {
+  document.getElementById('nickOverlay').classList.remove('on');
+  pendingType = null;
+}
+
+// ─── LEADERBOARD (localStorage fallback) ─────────────────────
+// Для общего рейтинга всех пользователей — подключи JSONBin:
+// 1. Зайди на jsonbin.io → создай бесплатный аккаунт
+// 2. Создай bin: {"scores":[]}
+// 3. Замени BIN_ID и API_KEY ниже своими значениями
+var BIN_ID  = ''; // например: '665abc123def4567890'
+var API_KEY = ''; // например: '$2a$10$...'
+
+var lbData = [];
+
+function loadLB() {
+  if (BIN_ID) {
+    fetch('https://api.jsonbin.io/v3/b/' + BIN_ID + '/latest', {
+      headers: { 'X-Master-Key': API_KEY }
+    }).then(function(r) { return r.json(); })
+      .then(function(j) { lbData = j.record.scores || []; renderLB(); refreshMyStats(); })
+      .catch(function() { lbData = JSON.parse(localStorage.getItem('cq_lb') || '[]'); renderLB(); });
+  } else {
+    lbData = JSON.parse(localStorage.getItem('cq_lb') || '[]');
+    renderLB();
+    refreshMyStats();
+  }
+}
+
+function submitScore(score, gameName) {
+  var idx = lbData.findIndex(function(x) { return x.nick === nickname; });
+  if (idx >= 0) {
+    lbData[idx].games = (lbData[idx].games || 1) + 1;
+    if (score > lbData[idx].score) { lbData[idx].score = score; lbData[idx].game = gameName; }
+  } else {
+    lbData.push({ nick: nickname, score: score, game: gameName, games: 1 });
+  }
+  lbData.sort(function(a, b) { return b.score - a.score; });
+  lbData = lbData.slice(0, 50);
+
+  if (BIN_ID) {
+    fetch('https://api.jsonbin.io/v3/b/' + BIN_ID, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify({ scores: lbData })
+    }).catch(function(){});
+  }
+  localStorage.setItem('cq_lb', JSON.stringify(lbData));
+  renderLB();
+  refreshMyStats();
+}
+
+function renderLB() {
+  var list = document.getElementById('lbList');
+  if (!list) return;
+  if (!lbData.length) { list.innerHTML = '<div class="lb-empty">Пока пусто.<br>Стань первым! 🏆</div>'; return; }
+  list.innerHTML = lbData.slice(0, 10).map(function(x, i) {
+    var rc = i===0?'r1':i===1?'r2':i===2?'r3':'';
+    var me = nickname && x.nick === nickname ? ' me' : '';
+    return '<div class="lb-row ' + rc + me + '">' +
+      '<div class="lbrank">' + (i+1) + '</div>' +
+      '<div class="lb-av">' + getAv(x.nick) + '</div>' +
+      '<div class="lb-info"><div class="lb-name">' + esc(x.nick) + (me?' 👈':'') + '</div>' +
+      '<div class="lb-game">' + esc(x.game||'—') + '</div></div>' +
+      '<div class="lb-score">' + x.score.toLocaleString() + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function refreshMyStats() {
+  if (!nickname) return;
+  var idx = lbData.findIndex(function(x) { return x.nick === nickname; });
+  if (idx < 0) return;
+  var me = lbData[idx];
+  document.getElementById('stGames').textContent = me.games || 1;
+  document.getElementById('stBest').textContent  = me.score.toLocaleString();
+  document.getElementById('stRank').textContent  = '#' + (idx + 1);
+}
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ─── GAME DATA ────────────────────────────────────────────────
+var GDATA = {
+  actor: {
+    title: '🎭 Угадай Актёра',
+    qs: [
+      { q:'Он играл Железного Человека и Шерлока Холмса. Прошёл путь от скандалов до триумфа в Marvel.', opts:['Крис Эванс','Роберт Дауни мл.','Крис Хемсворт','Марк Руффало'], a:1 },
+      { q:'Эта актриса — Катнисс в «Голодных играх» и лауреат Оскара за «Серебряные лайнинги».', opts:['Эмма Стоун','Натали Портман','Дженнифер Лоуренс','Скарлетт Йоханссон'], a:2 },
+      { q:'Он сыграл Джокера в 2019 году и получил за это Оскар. Также известен ролями в «Её» и «Мастере».', opts:['Хоакин Феникс','Джеред Лето','Хит Леджер','Брэд Питт'], a:0 },
+      { q:'Этот актёр — Форрест Гамп, Капитан Миллер и астронавт Марк Уотни.', opts:['Том Круз','Кевин Костнер','Том Хэнкс','Гэри Олдман'], a:2 },
+      { q:'Она сыграла Гермиону Грейнджер и Белль в «Красавице и Чудовище» 2017 года.', opts:['Эмма Робертс','Эмма Стоун','Эмма Уотсон','Кира Найтли'], a:2 },
+    ]
+  },
+  frame: {
+    title: '🎞️ Угадай Фильм',
+    qs: [
+      { q:'Молодой человек узнаёт, что реальность — симуляция, и присоединяется к повстанцам.', opts:['Начало','Матрица','Превосходство','Аватар'], a:1 },
+      { q:'Детектив с раздвоением личности расследует убийства, не зная, что сам убийца.', opts:['Семь','Бойцовский клуб','Игры разума','Помни'], a:1 },
+      { q:'Астронавт застрял на Марсе и выживает с помощью науки, пока Земля готовит спасение.', opts:['Интерстеллар','Гравитация','Марсианин','Прометей'], a:2 },
+      { q:'Группа из 11 воров планирует ограбление трёх казино Лас-Вегаса одновременно.', opts:['Схватка','Одиннадцать друзей Оушена','Ограбление','Престиж'], a:1 },
+      { q:'Маленькая рыбка-клоун пересекает океан, чтобы найти похищенного сына.', opts:['Акула','В поисках Немо','Душа','Тайна Коко'], a:1 },
+    ]
+  },
+  quote: {
+    title: '💬 Продолжи Фразу',
+    qs: [
+      { q:'"Я сделаю ему предложение, от которого он не сможет отказаться."', opts:['Лицо со шрамом','Крёстный отец','Однажды в Америке','Гангстер'], a:1 },
+      { q:'"Ты не можешь осилить правду!"', opts:['Несколько хороших парней','Джон Уик','Игра в кальмара','Адвокат дьявола'], a:0 },
+      { q:'"Хаос — это лестница."', opts:['Шерлок Холмс','Бойцовский клуб','Игра Престолов','Ганнибал'], a:2 },
+      { q:'"Я вернусь."', opts:['Рэмбо','Терминатор','Коммандо','Хищник'], a:1 },
+      { q:'"Да пребудет с тобой Сила."', opts:['Звёздный путь','Звёздные войны','Аватар','Дюна'], a:1 },
+    ]
+  },
+  emoji: {
+    title: '😀 Фильм в Эмодзи',
+    qs: [
+      { e:'🦁👑🌍', opts:['Король Лев','Дюна','Аватар','Властелин колец'], a:0 },
+      { e:'🕷️👨🏙️', opts:['Бэтмен','Сорвиголова','Человек-паук','Веном'], a:2 },
+      { e:'❄️👸🏔️', opts:['Золушка','Спящая красавица','Холодное сердце','Храбрая сердцем'], a:2 },
+      { e:'🚢💑🧊💔', opts:['Водный мир','Выживший','Титаник','Идеальный шторм'], a:2 },
+      { e:'👨‍🚀🌌⏳👨‍👧', opts:['Гравитация','Интерстеллар','Марсианин','Прибытие'], a:1 },
+    ]
+  },
+  anagram: {
+    title: '🔤 Анаграмма',
+    qs: [
+      { s:'ИДАГРАЛОТ', a:'ГЛАДИАТОР',  hint:'Рим, Рассел Кроу, Оскар 2001' },
+      { s:'АРМАТИЦЙ',  a:'МАТРИЦА',    hint:'Симуляция реальности, 1999' },
+      { s:'ТИМНАРТОЕР', a:'ТЕРМИНАТОР', hint:'Робот из будущего, Арнольд' },
+      { s:'ТИАКНИТ',   a:'ТИТАНИК',    hint:'Кэмерон, Ди Каприо, 1997' },
+      { s:'ДДАААВТР',  a:'АВАТАР',     hint:'Планета Пандора, синие существа' },
+    ]
+  },
+  year: {
+    title: '📅 Год Выхода',
+    qs: [
+      { m:'Матрица',                           hint:'Братья Вачовски, симуляция',     a:1999, min:1994, max:2006 },
+      { m:'Титаник',                           hint:'Кэмерон, Ди Каприо и Уинслет',  a:1997, min:1992, max:2005 },
+      { m:'Аватар',                            hint:'Кэмерон, планета Пандора',       a:2009, min:2004, max:2016 },
+      { m:'Интерстеллар',                      hint:'Нолан, путешествие через червоточину', a:2014, min:2009, max:2020 },
+      { m:'Властелин колец: Братство кольца',  hint:'Питер Джексон, Фродо',           a:2001, min:1997, max:2008 },
+    ]
+  },
+  imdb: {
+    title: '⭐ Рейтинг IMDb',
+    qs: [
+      { m:'Побег из Шоушенка', hint:'Тюремная драма, Фримен, 1994',     a:9.3, min:7.0, max:10.0 },
+      { m:'Крёстный отец',     hint:'Мафия, Коппола, Марлон Брандо',    a:9.2, min:7.0, max:10.0 },
+      { m:'Тёмный рыцарь',     hint:'Бэтмен, Хит Леджер — Джокер',     a:9.0, min:7.0, max:10.0 },
+      { m:'Форрест Гамп',      hint:'Том Хэнкс, жизнь простого человека', a:8.8, min:6.5, max:10.0 },
+      { m:'Интерстеллар',      hint:'Нолан, космос, 2014',               a:8.7, min:6.5, max:10.0 },
+    ]
+  }
+};
+var GNAMES = { actor:'Угадай Актёра', frame:'Угадай Фильм', quote:'Продолжи Фразу', emoji:'Фильм в Эмодзи', anagram:'Анаграмма', year:'Год Выхода', imdb:'Рейтинг IMDb' };
+
+// ─── GAME ENGINE ──────────────────────────────────────────────
+var G = { type:null, qi:0, score:0, timerId:null, tl:0, answered:false };
+
+function startGame(type) {
+  if (!nickname) {
+    pendingType = type;
+    document.getElementById('nickOverlay').classList.add('on');
+    setTimeout(function() { document.getElementById('nmInp').focus(); }, 250);
+    return;
+  }
+  openGame(type);
+}
+
+function openGame(type) {
+  if (G.timerId) clearInterval(G.timerId);
+  G = { type:type, qi:0, score:0, timerId:null, tl:15, answered:false };
+  document.getElementById('gTitle').textContent = GDATA[type].title;
+  renderQ();
+  document.getElementById('gameOverlay').classList.add('on');
+}
+
+function closeGame() {
+  if (G.timerId) clearInterval(G.timerId);
+  document.getElementById('gameOverlay').classList.remove('on');
+}
+
+// close on backdrop click
+document.getElementById('gameOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeGame();
+});
+document.getElementById('nickOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeNickModal();
+});
+
+// ─── RENDER QUESTION ──────────────────────────────────────────
+function dots() {
+  var n = GDATA[G.type].qs.length, h = '';
+  for (var i = 0; i < n; i++) h += '<div class="gp ' + (i<G.qi?'done':i===G.qi?'cur':'') + '"></div>';
+  return h;
+}
+function foot() {
+  return '<div class="fb" id="fb"></div>' +
+    '<div class="gfoot">' +
+      '<div class="gtimer">' +
+        '<div class="tbar-out"><div class="tbar" id="tb"></div></div>' +
+        '<div class="tnum" id="tn">15</div>' +
+      '</div>' +
+      '<div class="gscore">Очки: <span id="sn">0</span></div>' +
+    '</div>';
+}
+
+function renderQ() {
+  G.answered = false;
+  var g = GDATA[G.type], q = g.qs[G.qi], b = document.getElementById('gBody');
+  var n = g.qs.length;
+
+  if (G.type === 'anagram') {
+    b.innerHTML =
+      '<div class="gprog">' + dots() + '</div>' +
+      '<div class="qlbl">Вопрос ' + (G.qi+1) + ' из ' + n + ' — Разгадай анаграмму</div>' +
+      '<div class="ana-disp">' + q.s + '</div>' +
+      '<div class="ana-hint">Подсказка: ' + q.hint + '</div>' +
+      '<input class="ainput" id="ai" placeholder="ВВЕДИ ОТВЕТ" maxlength="20" ' +
+        'oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key===\'Enter\')chkAna()">' +
+      '<button class="btn btn-y btn-full" onclick="chkAna()" style="margin-bottom:10px">Проверить</button>' +
+      foot();
+    startTimer();
+    setTimeout(function() { var ai = document.getElementById('ai'); if (ai) ai.focus(); }, 80);
+    return;
+  }
+
+  if (G.type === 'year') {
+    var mid = Math.round((q.min + q.max) / 2);
+    b.innerHTML =
+      '<div class="gprog">' + dots() + '</div>' +
+      '<div class="qlbl">Вопрос ' + (G.qi+1) + ' из ' + n + ' — В каком году вышел фильм?</div>' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.7rem;text-align:center;margin-bottom:4px">' + q.m + '</div>' +
+      '<div style="font-size:.8rem;color:var(--muted);text-align:center;margin-bottom:20px">' + q.hint + '</div>' +
+      '<div class="sval" id="yv">' + mid + '</div>' +
+      '<div class="slabels"><span>' + q.min + '</span><span>' + q.max + '</span></div>' +
+      '<input type="range" min="' + q.min + '" max="' + q.max + '" value="' + mid + '" id="ys" ' +
+        'oninput="document.getElementById(\'yv\').textContent=this.value">' +
+      '<button class="btn btn-y btn-full" onclick="chkYear()" style="margin-bottom:10px">Подтвердить</button>' +
+      foot();
+    startTimer();
+    return;
+  }
+
+  if (G.type === 'imdb') {
+    var midI = 85; // 8.5 * 10
+    b.innerHTML =
+      '<div class="gprog">' + dots() + '</div>' +
+      '<div class="qlbl">Вопрос ' + (G.qi+1) + ' из ' + n + ' — Какой рейтинг на IMDb?</div>' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.7rem;text-align:center;margin-bottom:4px">' + q.m + '</div>' +
+      '<div style="font-size:.8rem;color:var(--muted);text-align:center;margin-bottom:20px">' + q.hint + '</div>' +
+      '<div class="sval" id="iv">8.5<small>/10</small></div>' +
+      '<div class="slabels"><span>' + q.min.toFixed(1) + '</span><span>' + q.max.toFixed(1) + '</span></div>' +
+      '<input type="range" min="' + Math.round(q.min*10) + '" max="' + Math.round(q.max*10) + '" value="' + midI + '" id="is" ' +
+        'oninput="document.getElementById(\'iv\').innerHTML=(this.value/10).toFixed(1)+\'<small>/10</small>\'">' +
+      '<button class="btn btn-y btn-full" onclick="chkImdb()" style="margin-bottom:10px">Подтвердить</button>' +
+      foot();
+    startTimer();
+    return;
+  }
+
+  if (G.type === 'emoji') {
+    b.innerHTML =
+      '<div class="gprog">' + dots() + '</div>' +
+      '<div class="qlbl">Вопрос ' + (G.qi+1) + ' из ' + n + ' — Какой фильм зашифрован?</div>' +
+      '<div class="emoji-disp">' + q.e + '</div>' +
+      '<div class="opts">' + q.opts.map(function(o,i){ return '<button class="opt" onclick="chkMC(this,' + i + ',' + q.a + ')">' + o + '</button>'; }).join('') + '</div>' +
+      foot();
+    startTimer();
+    return;
+  }
+
+  // quote, actor, frame
+  var isQ = G.type === 'quote';
+  b.innerHTML =
+    '<div class="gprog">' + dots() + '</div>' +
+    '<div class="qlbl">Вопрос ' + (G.qi+1) + ' из ' + n + (isQ ? ' — Из какого произведения?' : '') + '</div>' +
+    '<div class="qtext ' + (isQ ? '' : 'plain') + '">' + q.q + '</div>' +
+    '<div class="opts">' + q.opts.map(function(o,i){ return '<button class="opt" onclick="chkMC(this,' + i + ',' + q.a + ')">' + o + '</button>'; }).join('') + '</div>' +
+    foot();
+  startTimer();
+}
+
+// ─── TIMER (FIXED) ────────────────────────────────────────────
+function startTimer() {
+  if (G.timerId) clearInterval(G.timerId);
+  G.tl = 15;
+  updateTimerUI();
+  // Use Date-based timer for accuracy
+  var startTime = Date.now();
+  var totalMs = 15000;
+  G.timerId = setInterval(function() {
+    var elapsed = Date.now() - startTime;
+    var remaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
+    G.tl = remaining;
+    updateTimerUI();
+    if (remaining <= 0) {
+      clearInterval(G.timerId);
+      G.timerId = null;
+      onTimeout();
+    }
+  }, 200); // poll every 200ms for accuracy
+}
+
+function updateTimerUI() {
+  var tb = document.getElementById('tb');
+  var tn = document.getElementById('tn');
+  if (!tb || !tn) return;
+  var pct = (G.tl / 15) * 100;
+  tb.style.width = pct + '%';
+  tb.style.transition = 'none'; // instant update
+  var low = G.tl <= 5;
+  tb.className = 'tbar' + (low ? ' low' : '');
+  tn.textContent = G.tl;
+  tn.className = 'tnum' + (low ? ' low' : '');
+}
+
+function onTimeout() {
+  if (G.answered) return;
+  G.answered = true;
+  document.querySelectorAll('.opt').forEach(function(b) { b.disabled = true; });
+  var ai = document.getElementById('ai'); if (ai) ai.disabled = true;
+  var ys = document.getElementById('ys'); if (ys) ys.disabled = true;
+  var is = document.getElementById('is'); if (is) is.disabled = true;
+  setFb('⏰ Время вышло!', 'bad');
+  setTimeout(nextQ, 1800);
+}
+
+function setFb(msg, cls) {
+  var f = document.getElementById('fb');
+  if (f) { f.textContent = msg; f.className = 'fb ' + cls; }
+}
+function updScore() {
+  var s = document.getElementById('sn');
+  if (s) s.textContent = G.score.toLocaleString();
+}
+
+// ─── ANSWER CHECKS ────────────────────────────────────────────
+function chkMC(btn, chosen, correct) {
+  if (G.answered) return;
+  G.answered = true;
+  clearInterval(G.timerId);
+  document.querySelectorAll('.opt').forEach(function(b) { b.disabled = true; });
+  var pts = Math.round(100 + G.tl * 40);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    G.score += pts;
+    setFb('✅ Верно! +' + pts + ' очков', 'ok');
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt')[correct].classList.add('correct');
+    setFb('❌ Неверно', 'bad');
+  }
+  updScore();
+  setTimeout(nextQ, 1800);
+}
+
+function chkAna() {
+  if (G.answered) return;
+  var ai = document.getElementById('ai');
+  if (!ai) return;
+  G.answered = true;
+  clearInterval(G.timerId);
+  ai.disabled = true;
+  var q = GDATA[G.type].qs[G.qi];
+  var pts = Math.round(150 + G.tl * 50);
+  if (ai.value.trim() === q.a) {
+    ai.style.borderColor = 'var(--green)';
+    ai.style.color = 'var(--green)';
+    G.score += pts;
+    setFb('✅ Верно! +' + pts + ' очков', 'ok');
+  } else {
+    ai.style.borderColor = 'var(--red)';
+    ai.style.color = 'var(--red)';
+    setFb('❌ Правильно: ' + q.a, 'bad');
+  }
+  updScore();
+  setTimeout(nextQ, 2000);
+}
+
+function chkYear() {
+  if (G.answered) return;
+  var ys = document.getElementById('ys');
+  if (!ys) return;
+  G.answered = true;
+  clearInterval(G.timerId);
+  ys.disabled = true;
+  var q = GDATA[G.type].qs[G.qi];
+  var guess = parseInt(ys.value);
+  var diff = Math.abs(guess - q.a);
+  var pts = diff === 0 ? 500 : diff === 1 ? 380 : diff === 2 ? 250 : diff <= 4 ? 120 : 0;
+  G.score += pts;
+  updScore();
+  if (diff === 0) setFb('🎯 Точно! +' + pts, 'ok');
+  else if (diff <= 2) setFb('👍 Почти! Правильно: ' + q.a + ' (+' + pts + ')', 'ok');
+  else setFb('❌ Правильный год: ' + q.a + ' (разница ' + diff + ' лет)', 'bad');
+  setTimeout(nextQ, 2200);
+}
+
+function chkImdb() {
+  if (G.answered) return;
+  var is = document.getElementById('is');
+  if (!is) return;
+  G.answered = true;
+  clearInterval(G.timerId);
+  is.disabled = true;
+  var q = GDATA[G.type].qs[G.qi];
+  var guess = parseInt(is.value) / 10;
+  var diff = Math.abs(guess - q.a);
+  var pts = diff < 0.05 ? 500 : diff <= 0.15 ? 400 : diff <= 0.3 ? 260 : diff <= 0.5 ? 130 : 0;
+  G.score += pts;
+  updScore();
+  if (diff < 0.05) setFb('🎯 Точно! +' + pts, 'ok');
+  else if (diff <= 0.3) setFb('👍 Почти! Правильно: ' + q.a.toFixed(1) + '/10 (+' + pts + ')', 'ok');
+  else setFb('❌ Правильно: ' + q.a.toFixed(1) + '/10', 'bad');
+  setTimeout(nextQ, 2200);
+}
+
+// ─── NEXT / RESULT ────────────────────────────────────────────
+function nextQ() {
+  if (G.qi < GDATA[G.type].qs.length - 1) {
+    G.qi++;
+    renderQ();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  if (G.timerId) clearInterval(G.timerId);
+  var n = GDATA[G.type].qs.length;
+  var pct = Math.round((G.score / (n * 500)) * 100);
+  var emoji = '🎬', msg = 'Есть куда расти!';
+  if (pct >= 80) { emoji = '🏆'; msg = 'Ты настоящий киноман!'; }
+  else if (pct >= 50) { emoji = '🎭'; msg = 'Хороший результат!'; }
+  else if (pct >= 25) { emoji = '🎞️'; msg = 'Неплохое начало!'; }
+
+  var gname = GNAMES[G.type];
+  submitScore(G.score, gname);
+
+  var rank = lbData.findIndex(function(x) { return x.nick === nickname; }) + 1;
+  var rankTxt = rank > 0 ? 'Твоё место в рейтинге: <b>#' + rank + '</b>' : '';
+
+  var savedType = G.type;
+  document.getElementById('gBody').innerHTML =
+    '<div class="res">' +
+      '<div class="res-ico">' + emoji + '</div>' +
+      '<div class="res-title">' + msg + '</div>' +
+      '<div class="res-sub">Твой результат:</div>' +
+      '<div class="res-pts">' + G.score.toLocaleString() + ' очков</div>' +
+      '<div class="res-rank">' + rankTxt + '</div>' +
+      '<div class="res-btns">' +
+        '<button class="btn btn-y" onclick="openGame(\'' + savedType + '\')">▶ Ещё раз</button>' +
+        '<button class="btn btn-o" onclick="closeGame();goTo(\'games\')">Другая игра</button>' +
+        '<button class="btn btn-o" onclick="closeGame();goTo(\'leaders\')">Рейтинг</button>' +
+      '</div>' +
+    '</div>';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+updateNickUI();
+loadLB();
+setInterval(loadLB, 30000);
+</script>
+</body>
+</html>
